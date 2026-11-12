@@ -2,16 +2,35 @@
 
 A [Rosé Pine Moon](https://rosepinetheme.com/) theme for
 [Beamer](https://ctan.org/pkg/beamer): a dark, low-contrast presentation theme
-with a gradient accent rule, rounded callout boxes, a matching minted code
-style and a pgfplots palette.
+with rounded callout boxes, a matching minted code style and a pgfplots
+palette. It comes in two variants that share one palette, one set of callouts
+and one code style:
+
+- **`RosePineMoon`** (full): a golden-spiral title page, a section navigation
+  bar in the headline, a frame-title band, a frame-number footline and an
+  optional logo.
+- **`RosePineMoonSimple`**: a flat, centred title page, frame titles with a
+  gradient accent rule, section divider pages and an optional frame number.
 
 > All natural pine, faux fur and a bit of soho vibes for the classy minimalist.
 
-![Title slide](./screenshot-title.png)
+## RosePineMoon (full)
 
-| Callouts | Code | Plot |
-|---|---|---|
-| ![Callout boxes](./screenshot-callouts.png) | ![minted code](./screenshot-code.png) | ![pgfplots figure](./screenshot-plot.png) |
+![Title slide with the golden spiral](./screenshot-title.png)
+
+| Layout | Callouts |
+|---|---|
+| ![Headline, frame title, footline](./screenshot-layout.png) | ![Callout boxes](./screenshot-callouts.png) |
+
+| Code | Plot |
+|---|---|
+| ![minted code](./screenshot-code.png) | ![pgfplots figure](./screenshot-plot.png) |
+
+## RosePineMoonSimple
+
+![Simple title slide](./screenshot-simple-title.png)
+
+![Simple callout boxes](./screenshot-simple-callouts.png)
 
 ## Install
 
@@ -23,7 +42,8 @@ cd beamer-rose-pine-moon
 ./install.sh
 ```
 
-The installer copies the `.sty` files into
+The installer copies the `.sty` files of both variants and the default logo
+(`inkpot-logo.png`) into
 `$(kpsewhich -var-value TEXMFHOME)/tex/latex/beamer/RosePineMoon`.
 
 - It is idempotent: files that are already identical are left alone.
@@ -33,8 +53,8 @@ The installer copies the `.sty` files into
 
 ### Manual
 
-Copy the `*.sty` files next to your `.tex` file (or into any directory on
-`TEXINPUTS`).
+Copy the `*.sty` files (and `inkpot-logo.png`, for the full variant's default
+logo) next to your `.tex` file, or into any directory on `TEXINPUTS`.
 
 ### Code highlighting style (for minted)
 
@@ -56,23 +76,62 @@ install globally.) Without the style, minted stops with
 ```latex
 \documentclass[aspectratio=169]{beamer}
 \usepackage{fontawesome5}      % icons in the callout boxes
-\usetheme{RosePineMoon}
+\usetheme{RosePineMoon}        % or \usetheme{RosePineMoonSimple}
 ```
 
 Build with shell escape (minted calls out to `latexminted`):
 
 ```sh
-lualatex -shell-escape example.tex
+lualatex -shell-escape example.tex          # full variant
+lualatex -shell-escape example-simple.tex   # simple variant
 ```
 
-`example.tex` is a short demo deck covering every feature below.
+Run LaTeX twice (or use `latexmk`): the title-page spiral and overlays are
+placed relative to the page, which takes a second pass. `example.tex` and
+`example-simple.tex` are short demo decks covering every feature below;
+`example.tex` also sets TeX Gyre Heros as the sans font, which is optional.
+
+### The spiral title page (full variant)
+
+`\maketitle` (or `\titlepage` inside a `plain` frame) draws a golden-ratio
+spiral behind the title: eleven squares, each 1/φ the size of the one before
+and turned a quarter, filled in turn with `Base`, `HighlightLow`, `Overlay`,
+`HighlightMed` and `HighlightHigh`, with a quarter-circle arc through each.
+The large arc sweeps across the slide and the spiral winds into the lower
+left. Everything is sized from `\paperheight`, so it keeps its shape at any
+page size with a 16:9 ratio. The title, subtitle, author, date, institute and
+logo sit centred over it. `\maketitle` gives the title page a frame of its own
+with no headline, footline or frame number.
+
+The arc colour is the beamer colour `title page spiral`:
+
+```latex
+\setbeamercolor{title page spiral}{fg=Muted}
+```
+
+### Logo (full variant)
+
+The full variant puts a logo on the title page and a small one at the right of
+the footline. It defaults to the bundled `inkpot-logo.png`; change or remove
+it in the preamble:
+
+```latex
+\rpmlogo{my-logo.pdf}          % any file \includegraphics can read
+\rpmlogo{}                     % no logo
+\usetheme[nologo]{RosePineMoon} % no logo, as a theme option
+```
+
+A missing logo file gives a warning and is left out. Light artwork on a
+transparent background reads best on the dark palette.
 
 ### Options
 
-- `\usetheme[chrome]{RosePineMoon}` shows a minimal `n / total` frame number in
-  the footline (never on the first page). The default is no footline.
+- `\usetheme[nologo]{RosePineMoon}` leaves out the logo (see above).
+- `\usetheme[chrome]{RosePineMoonSimple}` shows a minimal `n / total` frame
+  number in the footline (never on the first page). The simple variant's
+  default is no footline. The full variant always has its footline.
 
-### Callout boxes
+### Callout boxes (both variants)
 
 `notebox`, `tip`, `warning`, `dangerbox` and `defbox`, each with an optional
 title argument and a fontawesome5 icon:
@@ -91,8 +150,9 @@ clash with existing beamer, amsthm or LaTeX definitions.
 ### Other helpers
 
 - `\code{text}` inline code on a Surface background.
-- `\rpmtoc` a "Where we are" table-of-contents frame highlighting the current
-  section.
+- `\rpmtoc` (simple variant) a "Where we are" table-of-contents frame
+  highlighting the current section. The full variant numbers its table of
+  contents and shades the other sections instead.
 - `rpm` pgfplots style (`\begin{axis}[rpm]`) using the palette.
 - The palette is available as colors: `Base`, `Surface`, `Overlay`, `Muted`,
   `Subtle`, `Text`, `Love`, `Gold`, `Rose`, `Pine`, `Foam`, `Iris`,
@@ -112,22 +172,35 @@ You must also have, outside LaTeX: Python with Pygments and `latexminted`
 (see above), and compile with `-shell-escape`. Tested with LuaLaTeX; XeLaTeX
 should also work.
 
-## Sub-themes
+## Files
 
-`\usetheme{RosePineMoon}` loads all of these:
+Shared by both variants, so they cannot drift apart:
 
 | File | Role |
 |---|---|
-| `beamerthemeRosePineMoon.sty` | Master theme, `chrome` option, loads the rest |
 | `beamercolorthemeRosePineMoon.sty` | Palette and beamer colors |
 | `beamerfontthemeRosePineMoon.sty` | Font roles |
-| `beamerinnerthemeRosePineMoon.sty` | Bullets, blocks, TOC |
-| `beamerouterthemeRosePineMoon.sty` | Title page, frame titles, section pages, footline |
 | `beamertikzthemeRosePineMoon.sty` | TikZ defaults, pgfplots `rpm` style |
 | `beamertcolorboxthemeRosePineMoon.sty` | Callout boxes |
 | `beamermintedthemeRosePineMoon.sty` | minted settings and the `rosepinemoon` style hookup |
+| `rosepinemoon.py`, `pyproject.toml` | The `rosepinemoon` Pygments style |
 
-`rosepinemoon.py` is the Pygments style itself.
+Full variant, `\usetheme{RosePineMoon}`:
+
+| File | Role |
+|---|---|
+| `beamerthemeRosePineMoon.sty` | Master theme, `nologo` option, loads the rest |
+| `beamerouterthemeRosePineMoon.sty` | Spiral title page, headline, frame title band, footline, `\rpmlogo` |
+| `beamerinnerthemeRosePineMoon.sty` | Circle bullets, numbered table of contents, captions |
+| `inkpot-logo.png` | Default logo |
+
+Simple variant, `\usetheme{RosePineMoonSimple}`:
+
+| File | Role |
+|---|---|
+| `beamerthemeRosePineMoonSimple.sty` | Master theme, `chrome` option, loads the rest |
+| `beamerouterthemeRosePineMoonSimple.sty` | Title page, frame titles, section pages, footline |
+| `beamerinnerthemeRosePineMoonSimple.sty` | Bullets, rounded blocks, `\rpmtoc` |
 
 ## Palette
 
@@ -137,3 +210,5 @@ Standard Rosé Pine Moon ([rose-pine/palette](https://github.com/rose-pine/palet
 
 [MIT](./LICENSE). Rosé Pine palette © the
 [Rosé Pine](https://github.com/rose-pine) authors.
+
+Logo: Inkpot (https://inkpot.md)

@@ -1,63 +1,150 @@
 % beamerouterthemeRosePineMoon.sty
-\ProvidesPackage{beamerouterthemeRosePineMoon}[2026/06/23 v1.0 Rosé Pine Moon Outer]
+% Outer layout of the full variant:
+%   - title page drawn over a golden-ratio spiral of palette-shaded squares
+%   - smoothbars headline with section names and frame bullets
+%   - frame title on a full-width HighlightMed band
+%   - footline with "n / total" on the left and a small logo on the right
+%   - \rpmlogo{path} chooses the logo (default inkpot-logo.png); \rpmlogo{}
+%     or the theme option nologo turns it off
+\ProvidesPackage{beamerouterthemeRosePineMoon}[2026/11/12 v2.0 Rosé Pine Moon Outer]
 \mode<presentation>
 \RequirePackage{tikz}
+\usetikzlibrary{calc}
 
+\useoutertheme[subsection=false]{smoothbars}
 \setbeamertemplate{navigation symbols}{}
 
-% Iris->Pine gradient accent rule, width given as #1 (a dimen expression)
-\newcommand{\rpm@accentrule}[1]{%
-  \begin{tikzpicture}
-    \shade[left color=Iris, right color=Pine] (0,0) rectangle (#1,1.4pt);
-  \end{tikzpicture}}
+% --- Colours for the layout pieces (palette from the shared colour theme) ---
+\setbeamercolor{titlelike}{fg=Text, bg=HighlightMed}
+\setbeamercolor{frametitle}{fg=Text, bg=HighlightMed}
+\setbeamercolor{footline}{fg=Text, bg=HighlightLow}
+\setbeamercolor{frame number}{fg=Text}
+\setbeamercolor{section in head/foot}{fg=Text, bg=HighlightLow}
+\setbeamercolor{subsection in head/foot}{fg=Text, bg=HighlightLow}
+\setbeamercolor{title in head/foot}{fg=Text, bg=HighlightLow}
+\setbeamercolor{author in head/foot}{fg=Text, bg=Pine}
+\setbeamercolor{lower separation line foot}{bg=HighlightLow}
+\setbeamercolor{separation line}{fg=HighlightLow}
+\setbeamercolor{fine separation line}{fg=HighlightLow}
+\setbeamercolor{section in toc}{fg=Text}
+\setbeamercolor{section in toc shaded}{fg=Subtle}
+\setbeamercolor{subsection in toc}{fg=Muted}
+% Spiral: the squares use Base, HighlightLow, Overlay, HighlightMed,
+% HighlightHigh in turn; the arc colour is its own beamer colour.
+\definecolor{rpm@spiralarc}{RGB}{64,64,64}
+\setbeamercolor{title page spiral}{fg=rpm@spiralarc}
 
-% --- Title page (flat, centered, no images) ---
-\setbeamertemplate{title page}{%
-  \begin{tikzpicture}[remember picture, overlay]
-    \node[anchor=center] at (current page.center) {%
-      \begin{minipage}{0.82\textwidth}\centering
-        {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
-        \ifx\insertsubtitle\@empty\else
-          \vspace{0.3cm}
-          {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
-        \fi
-        \vspace{0.4cm}\rpm@accentrule{0.82\textwidth}\par
-        \vspace{0.6cm}
-        {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
-        \vspace{0.2cm}
-        {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
-      \end{minipage}};
-  \end{tikzpicture}}
+% --- Headline bar: flat colour instead of the smoothbars fade ---
+\AtBeginDocument{%
+  \pgfdeclareverticalshading{beamer@barshade}{\the\paperwidth}{%
+    color(0ex)=(section in head/foot.bg);%
+    color(0.5ex)=(section in head/foot.bg);%
+    color(4ex)=(section in head/foot.bg)}}
 
-% --- Frame title: text + accent rule beneath, generous top margin ---
-\setbeamertemplate{frametitle}{%
-  \vskip0.6em
-  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle\par}
-  \vskip2pt\rpm@accentrule{\textwidth}%
-  \vskip0.4em}
+% --- Frame title: full-width band ---
+\setbeamertemplate{frametitle}[default][colsep=-4bp,rounded=false,shadow=false]
 
-% --- Section page: centered Iris title on Surface, Love bar above ---
-\setbeamertemplate{section page}{%
-  \begin{tikzpicture}[remember picture, overlay]
-    \fill[Surface] (current page.south west) rectangle (current page.north east);
-    \node[anchor=center] at (current page.center) {%
-      \begin{minipage}{0.8\textwidth}\centering
-        {\color{Love}\rule{2cm}{2pt}}\par\vspace{0.4cm}
-        {\usebeamerfont{section title}\color{Iris}\insertsection\par}
-      \end{minipage}};
-  \end{tikzpicture}}
-
-\AtBeginSection{%
-  \begin{frame}[plain,noframenumbering]%
-    \usebeamertemplate{section page}%
-  \end{frame}}
-
-% --- Footline: off by default, minimal frame number with [chrome] ---
-\setbeamertemplate{footline}{%
-  \ifrpm@chrome
-    \ifnum\thepage>1
-      \hfill{\usebeamerfont{footline}\color{Subtle}%
-        \insertframenumber\,/\,\inserttotalframenumber}\hspace*{1.5ex}\vskip4pt
+% --- Logo ---
+\def\rpm@logofile{inkpot-logo.png}
+\newcommand{\rpmlogo}[1]{\def\rpm@logofile{#1}}
+% #1 = height. Draws nothing when the logo is off, empty or missing.
+\newcommand{\rpm@insertlogo}[1]{%
+  \ifrpm@logo
+    \ifx\rpm@logofile\@empty\else
+      \IfFileExists{\rpm@logofile}%
+        {\includegraphics[height=#1]{\rpm@logofile}}%
+        {\PackageWarning{beamerouterthemeRosePineMoon}%
+          {Logo file '\rpm@logofile' not found; leaving it out}}%
     \fi
   \fi}
+
+% --- Footline: frame number left, small logo right ---
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,
+      leftskip=.3cm,rightskip=.3cm]{footline}%
+    {\usebeamerfont{footline}\usebeamercolor[fg]{frame number}%
+      \insertframenumber~/~\inserttotalframenumber}%
+    \hfill\raisebox{-0.6ex}{\rpm@insertlogo{2.4ex}}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[colsep=1.5pt]{lower separation line foot}%
+  \end{beamercolorbox}}
+
+% --- Golden spiral ---
+% Eleven squares, each 1/phi the side of the one before, turning a quarter
+% each step, with a quarter-circle arc through every square. All sizes are
+% fractions of \paperheight, so it scales with the page.
+\def\rpm@phi{1.6180339887}
+\def\rpm@spiral@side{1.0249}   % first square side, in \paperheight
+\def\rpm@spiral@x{1.6649}      % start point from the left edge, in \paperheight
+\def\rpm@spiral@y{-0.0271}     % start point from the bottom edge, in \paperheight
+\def\rpm@spiral@width{0.0055}  % arc line width, in \paperheight
+
+% #1 = squares | arcs. Two passes so no square covers an earlier arc.
+\newcommand{\rpm@spiralpass}[1]{%
+  \pgfmathsetlengthmacro{\rpm@s}{\rpm@spiral@side\paperheight}%
+  \xdef\rpm@s{\rpm@s}%
+  \coordinate (rpm@o) at ($(current page.south west)
+    + (\rpm@spiral@x\paperheight, \rpm@spiral@y\paperheight)$);
+  \foreach \rpm@a [count=\rpm@i from 0] in {0,90,...,900} {%
+    \coordinate (rpm@c) at ($(rpm@o) + (135+\rpm@a:1.4142135624*\rpm@s)$);
+    \ifx#1s%
+      \pgfmathtruncatemacro{\rpm@k}{mod(\rpm@i,5)}%
+      \ifcase\rpm@k\def\rpm@fill{Base}%
+      \or\def\rpm@fill{HighlightLow}%
+      \or\def\rpm@fill{Overlay}%
+      \or\def\rpm@fill{HighlightMed}%
+      \else\def\rpm@fill{HighlightHigh}%
+      \fi
+      \fill[\rpm@fill] (rpm@o) rectangle (rpm@c);
+    \else
+      \draw[line cap=round, line width=\rpm@spiral@width\paperheight,
+            color=title page spiral.fg]
+        (rpm@o) arc[start angle=\rpm@a, end angle=\rpm@a+90, radius=\rpm@s];
+    \fi
+    \coordinate (rpm@o) at (rpm@c);
+    \pgfmathsetlengthmacro{\rpm@s}{\rpm@s/\rpm@phi}%
+    \xdef\rpm@s{\rpm@s}%
+  }}
+
+\newcommand{\rpm@drawspiral}{%
+  \usebeamercolor{title page spiral}%
+  \begin{tikzpicture}[remember picture, overlay]
+    \rpm@spiralpass{s}%
+    \rpm@spiralpass{a}%
+  \end{tikzpicture}}
+
+% --- Title page: spiral behind, text centred over it, logo at the foot ---
+\setbeamertemplate{title page}{%
+  \rpm@drawspiral
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north, inner sep=0pt] at (current page.north) {%
+      \begin{minipage}[b][\paperheight]{0.8\paperwidth}
+        \vfill
+        \begin{center}
+          {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+          \ifx\insertsubtitle\@empty\else
+            \vspace{0.02\paperheight}
+            {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+          \fi
+          \vfill
+          {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+          \vspace{0.044\paperheight}
+          {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+          \vfill
+          {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+          \vspace{0.02\paperheight}
+          \rpm@insertlogo{0.09\paperheight}\par
+          \vspace{0.06\paperheight}
+        \end{center}
+      \end{minipage}};
+  \end{tikzpicture}}
+
+% \maketitle gives the title page a frame of its own, without head or foot
+\renewcommand{\maketitle}{%
+  \ifbeamer@inframe
+    \titlepage
+  \else
+    \frame[plain,noframenumbering]{\titlepage}%
+  \fi}
+
 \mode<all>

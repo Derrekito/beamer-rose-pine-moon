@@ -1,27 +1,22 @@
 % beamerinnerthemeRosePineMoon.sty
-\ProvidesPackage{beamerinnerthemeRosePineMoon}[2026/06/23 v1.0 Rosé Pine Moon Inner]
+% Inner layout of the full variant: circle bullets, numbered table of
+% contents with shaded entries, numbered captions. Item colours come from the
+% shared colour theme.
+\ProvidesPackage{beamerinnerthemeRosePineMoon}[2026/11/12 v2.0 Rosé Pine Moon Inner]
 \mode<presentation>
 
-% Clean bullet glyphs
-\setbeamertemplate{itemize item}{\small\raise0.4pt\hbox{\color{Pine}$\blacktriangleright$}}
-\setbeamertemplate{itemize subitem}{\color{Love}\textendash}
-\setbeamertemplate{itemize subsubitem}{\color{Iris}\textperiodcentered}
+\useinnertheme{circles}
+
 \setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{bibliography item}[text]
+\setbeamertemplate{caption}[numbered]
 
-% Rounded blocks
-\setbeamertemplate{blocks}[rounded][shadow=false]
-
-% Where-am-I TOC: current section highlighted Gold, others Subtle
-\setbeamercolor{section in toc}{fg=Subtle}
-\setbeamertemplate{section in toc}{%
-  \ifnum\inserttocsectionnumber=\value{section}%
-    {\color{Gold}\bfseries\inserttocsection}%
-  \else
-    {\color{Subtle}\inserttocsection}%
-  \fi\par\vskip4pt}
-\newcommand{\rpmtoc}{%
-  \begin{frame}{Where we are}
-    \tableofcontents[currentsection, sectionstyle=show, subsectionstyle=hide]
-  \end{frame}}
+% Table of contents: numbered sections and subsections, others shaded
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+\setbeamertemplate{section in toc shaded}[default][40]
+\setbeamertemplate{subsection in toc shaded}[default][10]
+\addtobeamertemplate{section in toc}{}{\vspace*{2pt}}
+\addtobeamertemplate{subsection in toc}{}{\vspace*{1pt}}
 
 \mode<all>

@@ -1,7 +1,9 @@
 #!/bin/sh
 # Install the Rosé Pine Moon Beamer theme.
 #
-# Copies the theme .sty files into
+# Installs both variants (\usetheme{RosePineMoon} and
+# \usetheme{RosePineMoonSimple}): copies every theme .sty file and the default
+# logo (inkpot-logo.png) into
 #   $(kpsewhich -var-value TEXMFHOME)/tex/latex/beamer/RosePineMoon
 # Idempotent and non-destructive: identical files are left alone, and a
 # differing existing file is backed up (name.bak.<timestamp>) before being
@@ -29,7 +31,7 @@ stamp=$(date +%Y%m%d%H%M%S)
 installed=0
 unchanged=0
 
-for src in "$SRC_DIR"/*.sty; do
+for src in "$SRC_DIR"/beamer*theme*.sty "$SRC_DIR"/inkpot-logo.png; do
   [ -f "$src" ] || continue
   name=$(basename "$src")
   dst="$DEST/$name"
@@ -45,7 +47,7 @@ for src in "$SRC_DIR"/*.sty; do
   installed=$((installed + 1))
 done
 
-echo "Rosé Pine Moon: $installed installed, $unchanged already up to date in $DEST"
+echo "Rosé Pine Moon (full + simple): $installed installed, $unchanged already up to date in $DEST"
 echo
 echo "(Running texhash is not needed for TEXMFHOME, but it is harmless.)"
 echo
