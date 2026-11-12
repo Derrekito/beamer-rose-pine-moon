@@ -82,12 +82,15 @@ install globally.) Without the style, minted stops with
 Build with shell escape (minted calls out to `latexminted`):
 
 ```sh
-lualatex -shell-escape example.tex          # full variant
-lualatex -shell-escape example-simple.tex   # simple variant
+latexmk example.tex          # full variant
+latexmk example-simple.tex   # simple variant
 ```
 
-Run LaTeX twice (or use `latexmk`): the title-page spiral and overlays are
-placed relative to the page, which takes a second pass. `example.tex` and
+Build with `latexmk`. The repo's `.latexmkrc` selects LuaLaTeX with
+`-shell-escape`; for your own decks, copy it or run
+`latexmk -lualatex -shell-escape deck.tex`. The title-page spiral and overlays
+are placed relative to the page, which takes several passes, and latexmk
+reruns until they settle. A single `lualatex` run leaves the spiral misplaced. `example.tex` and
 `example-simple.tex` are short demo decks covering every feature below;
 `example.tex` also sets TeX Gyre Heros as the sans font, which is optional.
 
